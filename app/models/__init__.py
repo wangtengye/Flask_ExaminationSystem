@@ -1,1 +1,1 @@
-from .user import Student, Teacher, Admin
+from .user import Student, Teacher, Admin, Class

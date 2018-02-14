@@ -1,5 +1,4 @@
 from flask_login import UserMixin
-
 from .. import db, login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -39,6 +38,17 @@ class Teacher(db.Model, User):
 class Admin(db.Model, User):
     __tablename__ = 'admin'
     permission = 'Admin'
+
+
+class Class(db.Model):
+    __table__name = 'class'
+    id = db.Column(db.BIGINT, primary_key=True)
+    tid = db.Column(db.BIGINT, db.ForeignKey('teacher.id'))
+    name = db.Column(db.CHAR(20))
+
+    @staticmethod
+    def get_id_by_name(name):
+        return Class.query.filter_by(name=name).first().id
 
 
 table_dict = {'student': Student, 'teacher': Teacher, 'admin': Admin}
