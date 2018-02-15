@@ -26,7 +26,7 @@
             <a class="navbar-brand" href="#"> welcome to 华南理工大学</a>
         </div>
         <ul class="nav navbar-nav nav-right" style="float:right;">
-            <li><a href="../change_info"><span class="glyphicon glyphicon-user" th:text="'  欢迎你！' +${session.name} + ' ' +${session.permission}"></span></a></li>
+            <li><a href="../change_info"><span class="glyphicon glyphicon-user" >   欢迎你！{{name}} {{permission}}</span></a></li>
             <li><a href="../logout"><span class="glyphicon glyphicon-log-in"></span>  退出</a></li>
         </ul>
     </div>
@@ -34,7 +34,7 @@
 <div style="margin: 0 auto;width: 900px;">
     <div style="margin-top:80px;margin-bottom:50px;">
         <ul class="nav nav-pills">
-            <li><a href="/">首页</a></li>
+            <li><a href="/admin">首页</a></li>
             <li><a href="add_student">添加学生</a></li>
             <li><a href="add_teacher">添加教师</a></li>
             <li><a href="student_manage">学生管理</a></li>
@@ -68,27 +68,32 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="tea,stat:${teachers}" th:id="${tea.id}+'tr'">
-                <td><input type="checkbox" name="id" th:id="${tea.id}+'c'"/></td>
-                <td th:text="${tea.id}" contenteditable="true" th:id="${tea.id}+'i'">2</td>
-                <td th:text="${tea.account}" contenteditable="true" th:id="${tea.id}+'a'">dsl2015</td>
-                <td th:text="${tea.name}" contenteditable="true" th:id="${tea.id}+'n'">董守玲</td>
+            {% for stu in teachers %}
+            <tr id="{{stu.id}}tr">
+                <td><input type="checkbox" name="id" id="{{stu.id}}ch"/></td>
+                <td id="{{stu.id}}i">{{stu.id}}</td>
+                <td contenteditable="true" id="{{stu.id}}a">{{stu.account}}</td>
+                <td contenteditable="true" id="{{stu.id}}n">{{stu.name}}</td>
                 <td>
-                    <button class="btn" type="button" style="margin-left: 0px;" th:id="${tea.id}+'u'"
+                    <button class="btn" type="button" style="margin: 0px;" id="{{stu.id}}u"
                             onclick="updateTeacher(this)">修改
                     </button>
                 </td>
 
                 <td>
-                    <button class="btn" type="button" style="margin: 0px;" th:id="${tea.id}+'r'"
+                    <button class="btn" type="button" style="margin: 0px;" id="{{stu.id}}r"
                             onclick="resetPassword(this)">重置密码
                     </button>
                 </td>
+
                 <td>
-                    <button class="btn" type="button" th:id="${tea.id}+'d'" onclick="deleteTeacher(this)">删除
+                    <button class="btn" type="button" style="margin: 0px;" id="{{stu.id}}d"
+                            onclick="deleteTeacher(this)">删除
                     </button>
                 </td>
+
             </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>
@@ -169,14 +174,14 @@
     function deleteBatch() {
         var IDs = new Array();
         $("input[name='id']:checked").each(function () {
-            var id = $(this).attr("id").replace('c', 'i');
+            var id = $(this).attr("id").replace('ch', 'i');
             IDs.push($('#' + id).text());
         })
         console.log(IDs);
         $.post("/admin/teacher/delete_batch", {list: IDs}, function (data, status) {
             if (data) {
                 $("input[name='id']:checked").each(function () {
-                    var id = $(this).attr("id").replace('c', 'tr');
+                    var id = $(this).attr("id").replace('ch', 'tr');
                     $('#' + id).remove();
                 })
                 alert("删除成功！");

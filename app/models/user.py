@@ -50,6 +50,10 @@ class Class(db.Model):
     def get_id_by_name(name):
         return Class.query.filter_by(name=name).first().id
 
+    @staticmethod
+    def get_name_by_id(id):
+        return Class.query.get(id).name
+
 
 table_dict = {'student': Student, 'teacher': Teacher, 'admin': Admin}
 

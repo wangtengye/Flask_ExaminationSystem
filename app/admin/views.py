@@ -1,7 +1,5 @@
-from tempfile import TemporaryFile, NamedTemporaryFile
-
 import os
-from flask import Blueprint, render_template, redirect, request, send_from_directory, jsonify
+from flask import Blueprint, render_template, redirect, request, send_from_directory
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
@@ -67,7 +65,74 @@ def upload(usr):
                           class_id=Class.get_id_by_name(row[2].value), password="123456")
         elif usr == 'teacher':
             stu = Teacher(account=row[0].value, name=row[1].value, password="123456")
-        db.session.add(stu)
+    db.session.add(stu)
     db.session.commit()
     os.remove(path)
     return "true"
+
+
+@admin.route('/student_manage')
+def student_manage():
+    students = Student.query.all()
+    for stu in students:
+        stu.class_name = Class.get_name_by_id(stu.class_id)
+    return render_template('admin/student_manage.html', students=students,
+                           name=current_user.name, permission=current_user.permission)
+
+
+@admin.route('/teacher_manage')
+def teacher_manage():
+    teachers = Teacher.query.all()
+    return render_template('admin/teacher_manage.html', teachers=teachers,
+                           name=current_user.name, permission=current_user.permission)
+
+
+@admin.route('/<usr>/reset', methods=['post'])
+def reset_password(usr):
+    if usr == 'student':
+        usr = Student.query.get(request.args['id'])
+    elif usr == 'teacher':
+        usr = Teacher.query.get(request.args['id'])
+    usr.password = '123456'
+    db.session.add(usr)
+    db.session.commit()
+    return 'true'
+
+
+@admin.route('/<usr>/delete')
+def delete(usr):
+    if usr == 'student':
+        usr = Student.query.get(request.args['id'])
+    elif usr == 'teacher':
+        usr = Teacher.query.get(request.args['id'])
+    db.session.delete(usr)
+    db.session.commit()
+    return 'true'
+
+
+@admin.route('/<usr>/delete_batch', methods=['post'])
+def delete_batch(usr):
+    ids = request.values.getlist('list[]')
+    if usr == 'student':
+        Student.query.filter(Student.id.in_(ids)).delete(synchronize_session=False)
+    elif usr == 'teacher':
+        Teacher.query.filter(Teacher.id.in_(ids)).delete(synchronize_session=False)
+    db.session.commit()
+    return 'true'
+
+
+@admin.route('/<usr>/update', methods=['post'])
+def update(usr):
+    data = request.form
+    user = None
+    if usr == 'student':
+        user = Student.query.get(data['id'])
+        user.class_id = Class.get_id_by_name(data['classid'])
+    elif usr == 'teacher':
+        user = Teacher.query.get(data['id'])
+
+    user.account = data['account']
+    user.name = data['name']
+    db.session.add(user)
+    db.session.commit()
+    return 'true'
