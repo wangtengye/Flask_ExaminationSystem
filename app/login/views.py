@@ -18,7 +18,7 @@ def static_file():
 
 @login.route('/')
 def index():
-    return render_template('login.html')
+    return render_template('login.html', next=request.args.get('next'))
 
 
 @login.route('/logout')
@@ -37,21 +37,25 @@ def do_login():
     account = request.form['account']
     password = request.form['password']
 
+    user = None
     stu = Student.query.filter_by(account=account).first()
     if stu is not None and stu.verify_password(password):
-        login_user(stu)
-        return '/student'
+        user = stu
 
     tea = Teacher.query.filter_by(account=account).first()
     if tea is not None and tea.verify_password(password):
-        login_user(tea)
-        return '/teacher'
+        user = tea
 
     admin = Admin.query.filter_by(account=account).first()
     if admin is not None and admin.verify_password(password):
-        login_user(admin)
-        return '/admin'
+        user = admin
 
+    if user is not None:
+        login_user(user)
+        next_ = request.args.get('next')
+        if next_ is None or not next_.startswith('/'):
+            next_ = user.permission.lower()
+        return next_
     return 'wrongpassword'
 
 

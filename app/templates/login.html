@@ -64,7 +64,7 @@
 <script>
     $('#loginForm').submit(function (e) {
         e.preventDefault();
-        $.post("/doLogin", $('#loginForm').serialize(), function (data) {
+        $.post("/doLogin?next={{ next }}", $('#loginForm').serialize(), function (data) {
             if (data == "wrongpassword") {
                 $('#verifyImg').attr('src', "/defaultKaptcha");
                 $('#alert').text("账号密码错误");
