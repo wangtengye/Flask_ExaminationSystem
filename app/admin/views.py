@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 
 from .. import db
 
-from ..models import Student, Teacher, Class
+from ..models import Student, Teacher, Class, table_dict
 from openpyxl import load_workbook
 
 admin = Blueprint('admin', __name__)
@@ -76,23 +76,18 @@ def student_manage():
     students = Student.query.all()
     for stu in students:
         stu.class_name = Class.get_name_by_id(stu.class_id)
-    return render_template('admin/student_manage.html', students=students,
-                           name=current_user.name, permission=current_user.permission)
+    return render_template('admin/student_manage.html', students=students)
 
 
 @admin.route('/teacher_manage')
 def teacher_manage():
     teachers = Teacher.query.all()
-    return render_template('admin/teacher_manage.html', teachers=teachers,
-                           name=current_user.name, permission=current_user.permission)
+    return render_template('admin/teacher_manage.html', teachers=teachers)
 
 
 @admin.route('/<usr>/reset', methods=['post'])
 def reset_password(usr):
-    if usr == 'student':
-        usr = Student.query.get(request.args['id'])
-    elif usr == 'teacher':
-        usr = Teacher.query.get(request.args['id'])
+    usr = table_dict[usr].query.get(request.args['id'])
     usr.password = '123456'
     db.session.add(usr)
     db.session.commit()
@@ -101,10 +96,7 @@ def reset_password(usr):
 
 @admin.route('/<usr>/delete')
 def delete(usr):
-    if usr == 'student':
-        usr = Student.query.get(request.args['id'])
-    elif usr == 'teacher':
-        usr = Teacher.query.get(request.args['id'])
+    usr = table_dict[usr].query.get(request.args['id'])
     db.session.delete(usr)
     db.session.commit()
     return 'true'
@@ -113,10 +105,7 @@ def delete(usr):
 @admin.route('/<usr>/delete_batch', methods=['post'])
 def delete_batch(usr):
     ids = request.values.getlist('list[]')
-    if usr == 'student':
-        Student.query.filter(Student.id.in_(ids)).delete(synchronize_session=False)
-    elif usr == 'teacher':
-        Teacher.query.filter(Teacher.id.in_(ids)).delete(synchronize_session=False)
+    table_dict[usr].query.filter(table_dict[usr].id.in_(ids)).delete(synchronize_session=False)
     db.session.commit()
     return 'true'
 
@@ -124,15 +113,16 @@ def delete_batch(usr):
 @admin.route('/<usr>/update', methods=['post'])
 def update(usr):
     data = request.form
-    user = None
+    user = table_dict[usr].query.get(data['id'])
     if usr == 'student':
-        user = Student.query.get(data['id'])
         user.class_id = Class.get_id_by_name(data['classid'])
-    elif usr == 'teacher':
-        user = Teacher.query.get(data['id'])
-
     user.account = data['account']
     user.name = data['name']
     db.session.add(user)
     db.session.commit()
     return 'true'
+
+
+@admin.route('/admin_info')
+def admin_info():
+    return render_template('admin/admin_info.html')

@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, redirect
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user, current_user
+from .. import db
 
-from ..models import Student, Teacher, Admin
+from ..models import Student, Teacher, Admin, table_dict
 
 login = Blueprint('login', __name__)
 static_file_suffix = ['.css', '.png']
@@ -52,3 +53,13 @@ def do_login():
         return '/admin'
 
     return 'wrongpassword'
+
+
+@login.route('/reset_password/<usr>', methods=['post'])
+def reset_password(usr):
+    user = table_dict[usr].query.get(current_user.id)
+    user.password = request.form['password']
+
+    db.session.add(user)
+    db.session.commit()
+    return 'true'

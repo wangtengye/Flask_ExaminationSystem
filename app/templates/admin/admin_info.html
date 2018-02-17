@@ -6,13 +6,12 @@
     <title>数据库在线系统</title>
     <link href="/css/bbb.css" type="text/css" rel="stylesheet" media="screen"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
-
+    <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.css"/>
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.css"/>
     <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css"/>
     <link rel="stylesheet" type="text/css" href="/css/aaa.css"/>
-    <link rel="stylesheet" type="text/css" href="/css/ccc.css"/>
 </head>
 
 <body>
@@ -33,7 +32,7 @@
 <div style="margin: 0 auto;width: 900px;">
     <div style="margin-top:80px;margin-bottom:50px;">
         <ul class="nav nav-pills">
-            <li><a href="/">首页</a></li>
+            <li><a href="/admin">首页</a></li>
             <li><a href="add_student">添加学生</a></li>
             <li><a href="add_teacher">添加教师</a></li>
             <li><a href="student_manage">学生管理</a></li>
@@ -46,29 +45,29 @@
         <blockquote><p style="color:#09679e;"><strong>个人信息</strong></p></blockquote>
         <div style="margin: 0 auto; width: 400px;">
             <span style="color:#09679e;"><strong>姓名： </strong></span>
-            <span style="color:#087ec2;" th:text="' ' +${session.name}"></span><br/>
+            <span style="color:#087ec2;" >{{ current_user.name }}</span><br/>
             <span style="color:#09679e;"><strong>身份： </strong></span>
-            <span style="color:#087ec2;" th:text="' ' +${session.permission}"></span><br/>
+            <span style="color:#087ec2;">{{ current_user.permission }}</span><br/>
             <hr/>
             <span class="left_txt"><strong>修改密码： </strong></span><br/><br/>
-
+            <form id="reset_password">
             <span class="left2_txt">新的密码： </span>
-    <input style="height: 25px;" type="password" id="newpassword"/><br/>
+    <input style="height: 25px;" type="password" id="newpassword" onchange="warning22()"/><br/>
         <span class="left2_txt">确认密码： </span>
-    <input style="height: 25px;" type="password" id="confirmpassword" onchange="warning22()"/><span
+    <input style="height: 25px;" type="password" name="password" id="confirmpassword" onchange="warning22()"/><span
     style="color:red;" id="warning2"></span><br/>
-        <input type="button" style="width: 240px;" value="提交" onclick="submit()"/>
-
+        <input type="submit" style="width: 240px;" value="提交"/>
+            </form>
 
         </div>
         </div>
         <div style="margin-bottom:70px;"></div>
-        </div>
 
         <div class="footer">
+        </div>
         Website by @ACJ @WTY @ICY @ZYR @DUCK @ZAL
     </div>
-    <script th:inline="javascript">
+    <script >
         /*<![CDATA[*/
         function warning22() {
             var x = document.getElementById("newpassword").value;
@@ -80,15 +79,25 @@
                 z.innerHTML = "";
         }
 
-    function submit() {
+    $('#reset_password').submit(function (e) {
+        e.preventDefault();
         var z = document.getElementById("warning2");
         var y = document.getElementById("confirmpassword").value;
         if (z.innerHTML == "") {
-            alert("修改成功");
-            window.location.href = "/change_info_submit?name=" + [[${session.name}]] + "&pw="
-                + y;
+
+            $.post("/reset_password/admin", $('#reset_password').serialize(), function (data) {
+                if (data) {
+                    alert("添加成功！");
+
+                }
+                else
+                    alert("添加失败！");
+            })
+
         }
-    }
+    })
+
+
 
     /*]]>*/
 </script>
