@@ -65,7 +65,7 @@ def upload(usr):
                           class_id=Class.get_id_by_name(row[2].value), password="123456")
         elif usr == 'teacher':
             stu = Teacher(account=row[0].value, name=row[1].value, password="123456")
-    db.session.add(stu)
+        db.session.add(stu)
     db.session.commit()
     os.remove(path)
     return "true"
