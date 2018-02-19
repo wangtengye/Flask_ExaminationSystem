@@ -24,7 +24,7 @@
         </div>
         <ul class="nav navbar-nav nav-right" style="float:right;">
             <li><a href="../change_info"><span class="glyphicon glyphicon-user" th:text="'  欢迎你！' +${session.name} + ' ' +${session.permission}"></span></a></li>
-            <li><a href="../logout.html"><span class="glyphicon glyphicon-log-in"></span>  退出</a></li>
+            <li><a href="../logout"><span class="glyphicon glyphicon-log-in"></span>  退出</a></li>
         </ul>
     </div>
 </nav>
@@ -52,13 +52,13 @@
                 <th>问题</th>
                 <th>答案</th>
             </tr>
-            <tr th:each="que,stat:${subjectQuestuon}" th:id="${que.id}+'tr'"
-                th:style="${stat.odd}? 'background-color:#ECF6EE'">
-                <td><input type="checkbox" name="id" th:id="${que.id}+'ch'" th:value="${que.id}"/></td>
-                <td th:text="${que.question}"  th:id="${que.id}+'q'">数据库三级模式中，真正存在的是（ ）。</td>
-                <td th:text="${que.refAnswer}"  th:id="${que.id}+'an'">D</td>
-
-            </tr>
+            {% for que in sub %}
+                <tr id="{{que.id}}tr">
+                    <td><input type="checkbox" name="id" id="{{que.id}}ch" value="{{ que.id }}"/></td>
+                    <td id="{{que.id}}q">{{que.question}}</td>
+                    <td id="{{que.id}}an">{{que.refanswer}}</td>
+                </tr>
+            {% endfor %}
             </tbody>
         </table>
         <div class="add_block">

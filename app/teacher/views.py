@@ -1,12 +1,12 @@
 import os
-from flask import Blueprint, render_template, redirect, request, send_from_directory
+from flask import Blueprint, render_template, redirect, request, send_from_directory, session
 from flask_login import login_required, current_user
 from openpyxl import load_workbook
 from werkzeug.utils import secure_filename
 
 from .. import db
 
-from ..models import Choice, Page, table_dict, Judge, Subject
+from ..models import Choice, Page, table_dict, Judge, Subject, Class, Paper
 
 teacher = Blueprint('teacher', __name__)
 
@@ -117,5 +117,46 @@ def update(qtype):
     elif qtype == 'sub':
         que.refanswer = data['refAnswer']
     db.session.add(que)
+    db.session.commit()
+    return 'true'
+
+
+@teacher.route('/get_paper')
+def get_paper():
+    return render_template('teacher/choice_combine.html', choice=Choice.query.all())
+
+
+@teacher.route('/<qtype>/combine')
+def combine(qtype):
+    if qtype == 'choice':
+        session['choi'] = request.args.get('choice')
+        return render_template('teacher/judge_combine.html', judge=Judge.query.all())
+    elif qtype == 'judge':
+        session['judg'] = request.args['judge']
+        return render_template('teacher/sub_combine.html', sub=Subject.query.all())
+    elif qtype == 'sub':
+        session['sub'] = request.args['sub']
+        return render_template('teacher/other_config.html')
+
+
+@teacher.route('/paper_finish', methods=['post'])
+def paper_finish():
+    name = request.args['name']
+    begintime = request.args['begintime']
+    finishtime = request.args['finishtime']
+    choi = session['choi']
+    judg = session['judg']
+    sub = session['sub']
+    tid = current_user.id
+    classid = '[|' + str(Class.get_id_by_name(request.args['classid'])) + '|]'
+
+    choicescore = '4,' * len(choi.split(','))
+    judgscore = '4,' * len(judg.split(','))
+    subscore = '4,' * len(sub.split(','))
+
+    print(name, begintime, finishtime, choi, judg, sub, tid, classid, choicescore, judgscore, subscore)
+    paper = Paper(name, begintime, finishtime, choi, judg, sub, choicescore[:-1],
+                  judgscore[:-1], subscore[:-1], tid, classid)
+    db.session.add(paper)
     db.session.commit()
     return 'true'
