@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 
 from .. import db
 
-from ..models import Choice, Page, table_dict, Judge, Subject, Class, Paper
+from ..models import Choice, Page, table_dict, Judge, Subject, Class, Paper, Student, Record
 
 teacher = Blueprint('teacher', __name__)
 
@@ -160,3 +160,16 @@ def paper_finish():
     db.session.add(paper)
     db.session.commit()
     return 'true'
+
+
+@teacher.route('/student_grade')
+def student_grade():
+    paper = Paper.query.filter_by(tid=current_user.id)
+    return render_template('teacher/student_grade.html', paper=paper)
+
+
+@teacher.route('/student_grade_list')
+def student_grade_list():
+    grade = db.session.query(Student.name, Record.score).filter(Record.pid == request.args['pid']) \
+        .filter(Student.id == Record.sid).all()
+    return render_template('teacher/student_grade_list.html', name=request.args['name'], grade=grade)

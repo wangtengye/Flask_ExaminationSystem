@@ -58,3 +58,12 @@ class Paper(db.Model):
         self.subscore = subscore
         self.tid = tid
         self.classid = classid
+
+
+class Record(db.Model):
+    __tablename__ = 'record'
+    sid = db.Column(db.BIGINT, primary_key=True)
+    pid = db.Column(db.BIGINT, primary_key=True)
+    record = db.Column(db.VARCHAR(5000))
+    status = db.Column(db.VARCHAR(4))
+    score = db.Column(db.INT)

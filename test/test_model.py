@@ -2,8 +2,9 @@ import unittest
 
 from flask import Flask
 
-from app.models import Student
-from app import app
+from app.models import Student, Record
+from app import app, db
+
 
 class StudentModelTest(unittest.TestCase):
     def setUp(self):
@@ -15,5 +16,10 @@ class StudentModelTest(unittest.TestCase):
         self.app_context.pop()
 
     def test_password(self):
-        stu=Student.query.filter_by(account='zal').first()
+        stu = Student.query.filter_by(account='zal').first()
         print(stu.name)
+
+    def test_grade_list(self):
+        grade= db.session.query(Student.name, Record.score).filter(Record.pid == 1) \
+            .filter(Student.id == Record.sid).all()
+        print(grade)
