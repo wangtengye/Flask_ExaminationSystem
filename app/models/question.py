@@ -16,4 +16,15 @@ class Choice(db.Model):
     rightanswer = db.Column(db.VARCHAR(10))
 
 
-qtable_dict = {'choice': Choice}
+class Judge(db.Model):
+    __tablename__ = 'judgedba'
+    id = db.Column(db.BIGINT, primary_key=True)
+    question = db.Column(db.VARCHAR(500))
+    rightanswer = db.Column(db.VARCHAR(2))
+
+
+class Subject(db.Model):
+    __tablename__ = 'subdba'
+    id = db.Column(db.BIGINT, primary_key=True)
+    question = db.Column(db.VARCHAR(500))
+    refanswer = db.Column(db.VARCHAR(500))

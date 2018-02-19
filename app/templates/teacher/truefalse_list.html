@@ -29,7 +29,7 @@
         <ul class="nav navbar-nav nav-right" style="float:right;">
             <li><a href="#"><span class="glyphicon glyphicon-user"
                                   th:text="'  欢迎你！' +${session.name} + ' ' +${session.permission}"></span></a></li>
-            <li><a href="../logout.html"><span class="glyphicon glyphicon-log-in"></span> 退出</a></li>
+            <li><a href="../logout"><span class="glyphicon glyphicon-log-in"></span> 退出</a></li>
         </ul>
     </div>
 </nav>
@@ -37,14 +37,14 @@
 <div style="margin: 0 auto;width: 900px;">
     <div style="margin-top:80px;margin-bottom:50px;">
         <ul class="nav nav-pills">
-            <li><a href="teacher_page.html">首页</a></li>
-            <li><a href="question_list.html">选择题题库</a></li>
-            <li class="active"><a href="truefalse_list.html">判断题题库</a></li>
-            <li><a href="sub_list.html">主观题题库</a></li>
-            <li><a href="get_paper.html">发布考试</a></li>
-            <li><a href="student_grade.html">查询学生成绩</a></li>
-            <li><a href="teacher_test_list.html">试卷列表</a></li>
-            <li><a href="teacher_info.html">个人信息</a></li>
+            <li><a href="/teacher">首页</a></li>
+            <li><a href="question_list">选择题题库</a></li>
+            <li class="active"><a href="truefalse_list">判断题题库</a></li>
+            <li><a href="sub_list">主观题题库</a></li>
+            <li><a href="get_paper">发布考试</a></li>
+            <li><a href="student_grade">查询学生成绩</a></li>
+            <li><a href="teacher_test_list">试卷列表</a></li>
+            <li><a href="teacher_info">个人信息</a></li>
         </ul>
     </div>
 
@@ -76,35 +76,41 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="que,stat:${judgeQuestuon}" th:id="${que.id}+'tr'"
-                            th:style="${stat.odd}? 'background-color:#ECF6EE'">
-                            <td><input type="checkbox" name="id" th:id="${que.id}+'ch'"/></td>
-                            <td th:text="${que.question}" contenteditable="true" th:id="${que.id}+'q'">数据库三级模式中，真正存在的是（ ）。</td>
-                            <td th:text="${que.rightAnswer}" contenteditable="true" th:id="${que.id}+'an'">D</td>
+                        {% for que in choice %}
+                        <tr id="{{que.id}}tr">
+                            <td><input type="checkbox" name="id" id="{{que.id}}ch"/></td>
+                            <td contenteditable="true" id="{{que.id}}q">{{que.question}}</td>
+                            <td contenteditable="true" id="{{que.id}}an">{{que.rightanswer}}</td>
                             <td>
-                                <button class="btn" type="button" style="margin: 0px;" th:id="${que.id}+'u'"
+                                <button class="btn" type="button" style="margin: 0px;" id="{{que.id}}u"
                                         onclick="updateJudgeQuestion(this)">修改
                                 </button>
-                                <button class="btn" type="button" style="margin: 0px;" th:id="${que.id}+'d'"
+                                <button class="btn" type="button" style="margin: 0px;" id="{{que.id}}d"
                                         onclick="deleteJudgeQuestion(this)">删除
                                 </button>
 
                             </td>
                         </tr>
+                        {% endfor %}}
                         </tbody>
                     </table>
                     <div class="add_block">
                         <div class="add_bottom">
-                            共 <b id="total" th:text="${page.count}">10</b> 条
-                            <a th:if="${page.currentPage!=1}" href="truefalse_list?currentPage=1">首页</a>
-                            <a th:if="${page.currentPage!=1}"
-                               th:href="'truefalse_list?currentPage='+${page.currentPage-1}">上一页</a>
-                            当前第<span th:text="${page.currentPage}+'/'+${page.totalPage}">1</span>页
-                            <a th:if="${page.currentPage!=page.totalPage}"
-                               th:href="'truefalse_list?currentPage='+${page.currentPage+1}">下一页</a>
-                            <a th:if="${page.currentPage!=page.totalPage}"
-                               th:href="'truefalse_list?currentPage='+${page.totalPage}">末页</a>
-                            跳至&nbsp;<input id="currentPageText" type='text' th:value="${page.currentPage}"
+                            共 <b id="total" >{{page.count}}</b> 条
+                            {% if page.current_page|int!=1 %}
+                            <a  href="truefalse_list?currentPage=1">首页</a>
+                            {% endif %}
+                            {% if page.current_page|int!=1 %}
+                            <a href="truefalse_list?currentPage={{page.current_page|int-1}}">上一页</a>
+                            {% endif %}
+                            当前第<span>{{page.current_page}}/{{page.total_page}}</span>页
+                            {% if page.current_page|int!=page.total_page %}
+                            <a href="truefalse_list?currentPage={{page.current_page|int+1}}">下一页</a>
+                            {% endif %}
+                            {% if page.current_page|int!=page.total_page %}
+                            <a href="truefalse_list?currentPage=+{{page.total_page}}">末页</a>
+                            {% endif %}
+                            跳至&nbsp;<input id="currentPageText" type='text' value="{{page.current_page}}"
                                            style="height:26px;"/>&nbsp;页&nbsp;
                             <a href="" id="aaa">GO</a>
                         </div>

@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 
 from .. import db
 
-from ..models import Choice, Page, table_dict
+from ..models import Choice, Page, table_dict, Judge, Subject
 
 teacher = Blueprint('teacher', __name__)
 
@@ -25,8 +25,25 @@ def home():
 
 @teacher.route('/question_list')
 def question_list():
+    choice, p = get_question('choice')
+    return render_template('teacher/question_list.html', choice=choice, page=p)
+
+
+@teacher.route('/truefalse_list')
+def truefalse_list():
+    choice, p = get_question('judge')
+    return render_template('teacher/truefalse_list.html', choice=choice, page=p)
+
+
+@teacher.route('/sub_list')
+def sub_list():
+    choice, p = get_question('sub')
+    return render_template('teacher/sub_list.html', choice=choice, page=p)
+
+
+def get_question(qtype):
     current_page = request.args.get('currentPage') if request.args.get('currentPage') is not None else 1
-    count = Choice.query.count()
+    count = table_dict[qtype].query.count()
 
     p = Page()
     total_page = count // p.page_number if count % p.page_number == 0 else count // p.page_number + 1
@@ -35,8 +52,8 @@ def question_list():
     p.total_page = total_page
     p.current_page = current_page
 
-    choice = Choice.query.offset((int(current_page) - 1) * p.page_number).limit(p.page_number).all()
-    return render_template('teacher/question_list.html', choice=choice, page=p)
+    que = table_dict[qtype].query.offset((int(current_page) - 1) * p.page_number).limit(p.page_number).all()
+    return que, p
 
 
 @teacher.route('/<qtype>/delete')
@@ -73,9 +90,11 @@ def upload(qtype):
     for row in ws.iter_rows(min_row=2):
         if qtype == 'choice':
             que = Choice(question=row[0].value, option1=row[1].value, option2=row[2].value,
-                         option3=row[3].value, option4=row[4].value, rightanswer=row[5].value, )
-        elif qtype == 'teacher':
-            pass
+                         option3=row[3].value, option4=row[4].value, rightanswer=row[5].value)
+        elif qtype == 'judge':
+            que = Judge(question=row[0].value, rightanswer=row[1].value)
+        elif qtype == 'sub':
+            que = Subject(question=row[0].value, refanswer=row[1].value)
         db.session.add(que)
     db.session.commit()
     os.remove(path)
@@ -93,6 +112,10 @@ def update(qtype):
         que.option3 = data['option3']
         que.option4 = data['option4']
         que.rightanswer = data['rightAnswer']
+    elif qtype == 'judge':
+        que.rightanswer = data['rightAnswer']
+    elif qtype == 'sub':
+        que.refanswer = data['refAnswer']
     db.session.add(que)
     db.session.commit()
     return 'true'
