@@ -1,7 +1,10 @@
 import os
-from flask import Blueprint, render_template, redirect, request, send_from_directory, session
+
+import itertools
+from flask import Blueprint, render_template, redirect, request, send_from_directory, session, json
 from flask_login import login_required, current_user
 from openpyxl import load_workbook
+from pyecharts import Line
 from werkzeug.utils import secure_filename
 
 from .. import db
@@ -173,3 +176,14 @@ def student_grade_list():
     grade = db.session.query(Student.name, Record.score).filter(Record.pid == request.args['pid']) \
         .filter(Student.id == Record.sid).all()
     return render_template('teacher/student_grade_list.html', name=request.args['name'], grade=grade)
+
+
+@teacher.route('/get_chart')
+def get_chart():
+    raw_data = db.session.query(Record.score).filter(Record.pid == request.args['pid']).all()
+    data = list(itertools.chain(*raw_data))
+    line = Line(request.args['name'])
+    line.add(None, is_xaxis_show=False, x_axis=[''] * len(data), is_xaxis_boundarygap=False, y_axis=data,
+             mark_point=['min', 'max'], mark_line=['average'])
+    return render_template('teacher/student_chart.html', name=request.args['name'],
+                           data=json.dumps(line.options))
